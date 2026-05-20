@@ -1,214 +1,466 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
+import { Zap, Shield, Users, TrendingUp, Wallet, Star, ChevronRight, MessageCircle, Swords, Trophy, Sparkles, Menu, X } from "lucide-react";
+
+const CHARS = [
+  { name: "Aqua", role: "Goddess · Useless but loveable", img: "https://cdn.myanimelist.net/images/characters/14/282523.jpg", color: "#4fc3f7", glow: "rgba(79,195,247,0.4)" },
+  { name: "Megumin", role: "Arch-Wizard · Explosion!", img: "https://cdn.myanimelist.net/images/characters/14/349249.jpg", color: "#ef5350", glow: "rgba(239,83,80,0.4)" },
+  { name: "Darkness", role: "Crusader · M-Masochist", img: "https://cdn.myanimelist.net/images/characters/14/266229.jpg", color: "#ffd54f", glow: "rgba(255,213,79,0.4)" },
+  { name: "Kazuma", role: "Adventurer · Reincarnated", img: "https://cdn.myanimelist.net/images/characters/8/301302.jpg", color: "#a5d6a7", glow: "rgba(165,214,167,0.4)" },
+];
+
+const FEATURES = [
+  { icon: <Wallet size={20} />, title: "Economy System", desc: "Wallet, bank, daily rewards, fishing, digging and more. All synced live.", color: "#4fc3f7" },
+  { icon: <Zap size={20} />, title: "Real-Time Sync", desc: "Everything you do on WhatsApp appears instantly on your dashboard.", color: "#ffd54f" },
+  { icon: <Star size={20} />, title: "Level & XP", desc: "Level up, earn XP, track your progress and climb the leaderboard.", color: "#ce93d8" },
+  { icon: <Swords size={20} />, title: "RPG & Combat", desc: "Battle monsters, join dungeons, unlock classes and gear up for war.", color: "#ef5350" },
+  { icon: <Sparkles size={20} />, title: "Pokémon", desc: "Catch Pokémon, battle, evolve, collect shiny variants and trade.", color: "#a5d6a7" },
+  { icon: <TrendingUp size={20} />, title: "Gambling", desc: "Coinflip, slots, blackjack, roulette — high risk, high reward.", color: "#ffb74d" },
+  { icon: <Shield size={20} />, title: "Group Tools", desc: "Anti-link, welcome messages, admin control and group management.", color: "#80cbc4" },
+  { icon: <Users size={20} />, title: "Community", desc: "Guilds, leaderboards, gifting, achievements and global events.", color: "#f48fb1" },
+];
+
+const BANNERS = [
+  "https://cdn.myanimelist.net/images/anime/3/76876l.jpg",
+  "https://cdn.myanimelist.net/images/anime/8/77831l.jpg",
+  "https://cdn.myanimelist.net/images/anime/10/81308l.jpg",
+  "https://cdn.myanimelist.net/images/anime/1895/142748l.jpg",
+];
 
 export default function Home() {
   const [, setLocation] = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", fontFamily: "'Poppins', sans-serif", background: "#080812", overflowX: "hidden" }}>
       <style>{`
-        header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 1.5rem 2rem;
-          border-bottom: 1px solid var(--border);
-          backdrop-filter: blur(10px);
-          position: sticky;
-          top: 0;
-          z-index: 100;
-          background: rgba(10, 4, 21, 0.8);
-        }
-        .logo { display: flex; align-items: center; gap: 0.5rem; font-weight: 900; font-size: 1.3rem; }
-        nav ul { list-style: none; display: flex; gap: 2rem; }
-        nav a { color: var(--text-secondary); font-weight: 500; transition: color 0.3s; }
-        nav a:hover { color: var(--cyan); }
-        .btn-get-started {
-          background: linear-gradient(135deg, var(--cyan), #00b8cc);
-          color: #000;
-          border: none;
-          padding: 0.7rem 1.5rem;
-          border-radius: 10px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.3s;
-          font-size: 0.95rem;
-        }
-        .btn-get-started:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,217,255,0.4); }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        img { max-width: 100%; display: block; }
 
-        .hero-wrapper {
-          position: relative;
-          padding: 5rem 2rem;
+        /* ── NAV ── */
+        .kn-nav {
+          display: flex; justify-content: space-between; align-items: center;
+          padding: 0.9rem 1.5rem;
+          background: rgba(8,8,18,.92); backdrop-filter: blur(24px);
+          border-bottom: 1px solid rgba(79,195,247,.12);
+          position: sticky; top: 0; z-index: 200;
+          gap: 1rem;
+        }
+        .kn-logo { display: flex; align-items: center; gap: .65rem; flex-shrink: 0; }
+        .kn-logo-img { width: 38px; height: 38px; border-radius: 10px; object-fit: cover; border: 2px solid rgba(79,195,247,.4); box-shadow: 0 0 14px rgba(79,195,247,.3); flex-shrink: 0; }
+        .kn-logo-name { font-size: 1.05rem; font-weight: 900; color: #fff; line-height: 1.1; }
+        .kn-logo-sub { font-size: .6rem; color: #4fc3f7; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+        .kn-nav-links { display: flex; gap: 1.6rem; list-style: none; }
+        .kn-nav-links a { color: #78909c; font-weight: 500; font-size: .85rem; cursor: pointer; transition: color .2s; white-space: nowrap; }
+        .kn-nav-links a:hover { color: #4fc3f7; }
+        .kn-nav-btns { display: flex; gap: .6rem; flex-shrink: 0; }
+        .btn-ghost { background: transparent; border: 1px solid rgba(79,195,247,.3); color: #4fc3f7; padding: .5rem 1.1rem; border-radius: 50px; font-weight: 600; font-size: .82rem; cursor: pointer; transition: all .2s; font-family: 'Poppins', sans-serif; white-space: nowrap; }
+        .btn-ghost:hover { background: rgba(79,195,247,.1); }
+        .btn-main { background: linear-gradient(135deg,#4fc3f7,#0288d1); color: #000; border: none; padding: .5rem 1.3rem; border-radius: 50px; font-weight: 700; font-size: .82rem; cursor: pointer; transition: all .25s; font-family: 'Poppins', sans-serif; white-space: nowrap; box-shadow: 0 4px 14px rgba(79,195,247,.3); }
+        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(79,195,247,.5); }
+        .hamburger { display: none; background: none; border: 1px solid rgba(79,195,247,.3); color: #4fc3f7; border-radius: 8px; padding: .4rem; cursor: pointer; align-items: center; justify-content: center; }
+
+        /* Mobile menu */
+        .mobile-menu {
+          display: none; flex-direction: column; gap: 0;
+          background: rgba(8,8,18,.98); border-bottom: 1px solid rgba(79,195,247,.12);
+          position: fixed; top: 57px; left: 0; right: 0; z-index: 199;
+          backdrop-filter: blur(24px);
+        }
+        .mobile-menu.open { display: flex; }
+        .mobile-menu a { display: block; padding: .9rem 1.5rem; color: #90a4ae; font-weight: 500; font-size: .95rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,.04); transition: color .2s; }
+        .mobile-menu a:hover { color: #4fc3f7; }
+        .mobile-menu-btns { display: flex; gap: .7rem; padding: 1rem 1.5rem; }
+        .mobile-menu-btns .btn-ghost, .mobile-menu-btns .btn-main { flex: 1; text-align: center; padding: .7rem 1rem; font-size: .9rem; }
+
+        /* ── HERO ── */
+        .hero {
+          position: relative; min-height: 90vh;
+          display: flex; align-items: center;
           overflow: hidden;
         }
-        .hero-background {
+        .hero-bg {
           position: absolute; inset: 0;
-          background: radial-gradient(ellipse at 60% 50%, rgba(112,64,192,0.15) 0%, transparent 70%),
-                      radial-gradient(ellipse at 20% 20%, rgba(0,217,255,0.08) 0%, transparent 50%);
+          background: url('https://cdn.myanimelist.net/images/anime/10/81308l.jpg') center/cover no-repeat;
+          filter: brightness(.2) saturate(1.4);
+        }
+        .hero-overlay {
+          position: absolute; inset: 0;
+          background: linear-gradient(135deg, rgba(8,8,18,.95) 0%, rgba(8,8,18,.6) 50%, rgba(8,8,18,.9) 100%);
         }
         .hero-glow {
-          position: absolute;
-          width: 500px; height: 500px;
-          background: radial-gradient(circle, rgba(0,217,255,0.1) 0%, transparent 70%);
-          right: 10%; top: 50%; transform: translateY(-50%);
-          border-radius: 50%;
-          animation: pulse 4s ease-in-out infinite;
+          position: absolute; width: 500px; height: 500px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(79,195,247,.1), transparent 70%);
+          top: -100px; right: 0; pointer-events: none;
         }
-        @keyframes pulse { 0%,100% { transform: translateY(-50%) scale(1); opacity: 0.5; } 50% { transform: translateY(-50%) scale(1.1); opacity: 1; } }
-        .hero-content {
-          position: relative;
-          max-width: 1200px;
-          margin: 0 auto;
-          display: flex;
-          align-items: center;
-          gap: 4rem;
+        .hero-inner {
+          position: relative; z-index: 2;
+          max-width: 1100px; margin: 0 auto;
+          padding: 3rem 1.5rem;
+          display: flex; gap: 3rem; align-items: center; flex-wrap: wrap; width: 100%;
         }
-        .hero-text { flex: 1; }
-        .hero-text h1 {
-          font-size: clamp(2.2rem, 5vw, 3.8rem);
-          font-weight: 900;
-          background: linear-gradient(135deg, #fff 0%, var(--cyan) 50%, var(--primary-light) 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          line-height: 1.2;
-          margin-bottom: 1.5rem;
+        .hero-text { flex: 1; min-width: 0; }
+        .hero-eyebrow {
+          display: inline-flex; align-items: center; gap: .5rem;
+          background: rgba(79,195,247,.08); border: 1px solid rgba(79,195,247,.25);
+          border-radius: 50px; padding: .35rem .9rem; margin-bottom: 1.2rem;
+          font-size: .72rem; color: #4fc3f7; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
         }
-        .hero-text p { color: var(--text-secondary); font-size: 1.15rem; line-height: 1.7; margin-bottom: 2rem; }
-        .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
-        .btn-primary {
-          background: linear-gradient(135deg, var(--cyan), #00b8cc);
-          color: #000; border: none;
-          padding: 1rem 2rem; border-radius: 12px;
-          font-weight: 700; font-size: 1rem; cursor: pointer;
-          transition: all 0.3s;
-          box-shadow: 0 10px 30px rgba(0,217,255,0.3);
+        .hero-title { font-size: clamp(2rem, 6vw, 4rem); font-weight: 900; line-height: 1.1; margin-bottom: 1rem; letter-spacing: -.02em; }
+        .hero-title .g1 { background: linear-gradient(135deg,#fff 0%,#e0f7fa 60%,#4fc3f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero-title .g2 { background: linear-gradient(135deg,#ffd54f,#ef5350); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero-desc { color: #78909c; font-size: clamp(.88rem, 2vw, 1rem); line-height: 1.75; margin-bottom: 1.8rem; }
+        .hero-btns { display: flex; gap: .8rem; flex-wrap: wrap; }
+        .btn-hero-primary {
+          display: inline-flex; align-items: center; gap: .45rem;
+          background: linear-gradient(135deg,#4fc3f7,#0288d1); color: #000;
+          border: none; padding: .9rem 1.8rem; border-radius: 50px;
+          font-weight: 700; font-size: .95rem; cursor: pointer; transition: all .25s;
+          box-shadow: 0 10px 28px rgba(79,195,247,.3); font-family: 'Poppins', sans-serif;
         }
-        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,217,255,0.5); }
-        .btn-secondary {
-          background: rgba(112,64,192,0.2); color: var(--text-primary);
-          border: 1px solid rgba(112,64,192,0.4);
-          padding: 1rem 2rem; border-radius: 12px;
-          font-weight: 600; font-size: 1rem; cursor: pointer;
-          transition: all 0.3s;
+        .btn-hero-primary:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(79,195,247,.5); }
+        .btn-hero-sec {
+          display: inline-flex; align-items: center; gap: .45rem;
+          background: rgba(255,213,79,.07); border: 1px solid rgba(255,213,79,.3);
+          color: #ffd54f; padding: .9rem 1.8rem; border-radius: 50px;
+          font-weight: 600; font-size: .95rem; cursor: pointer; transition: all .25s;
+          font-family: 'Poppins', sans-serif;
         }
-        .btn-secondary:hover { background: rgba(112,64,192,0.35); }
-        .hero-image { flex: 0.8; }
-        .hero-card {
-          background: linear-gradient(135deg, rgba(112,64,192,0.15), rgba(0,217,255,0.08));
-          border: 1px solid rgba(0,217,255,0.25);
-          border-radius: 20px;
-          padding: 2.5rem;
-          backdrop-filter: blur(10px);
-          box-shadow: 0 20px 60px rgba(0,217,255,0.1);
-          animation: float 6s ease-in-out infinite;
+        .btn-hero-sec:hover { background: rgba(255,213,79,.14); }
+        .anime-badge {
+          display: inline-flex; align-items: center; gap: .55rem;
+          background: rgba(255,213,79,.05); border: 1px solid rgba(255,213,79,.18);
+          border-radius: 10px; padding: .45rem .9rem; margin-top: 1.4rem;
+          font-size: .75rem; color: #ffd54f; font-weight: 600; flex-wrap: wrap;
         }
-        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-        .hero-card-content { text-align: center; }
-        .hero-icon { font-size: 4rem; margin-bottom: 1rem; filter: drop-shadow(0 0 20px rgba(0,217,255,0.6)); }
-        .hero-card h3 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.8rem; color: var(--cyan); }
-        .hero-card p { color: var(--text-secondary); line-height: 1.6; }
+        .anime-badge img { width: 22px; height: 22px; border-radius: 5px; object-fit: cover; flex-shrink: 0; }
 
-        .section { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
-        .section-title {
-          font-size: 2.2rem; font-weight: 900; text-align: center; margin-bottom: 1rem;
-          background: linear-gradient(135deg, #fff, var(--cyan));
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        /* Hero chars grid */
+        .hero-chars { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; flex: 0 0 300px; }
+        .char-card {
+          position: relative; border-radius: 16px; overflow: hidden;
+          aspect-ratio: .72; cursor: pointer;
+          transition: transform .3s, box-shadow .3s;
+          border: 1px solid rgba(255,255,255,.06);
         }
-        .section-subtitle { color: var(--text-secondary); text-align: center; margin-bottom: 3rem; font-size: 1.05rem; }
-        .features-grid {
-          display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;
-        }
-        .feature-card {
-          background: linear-gradient(135deg, rgba(112,64,192,0.1), rgba(0,217,255,0.05));
-          border: 1px solid rgba(0,217,255,0.15);
-          border-radius: 16px; padding: 2rem;
-          transition: all 0.3s;
-          opacity: 0;
-          animation: fadeIn 0.6s ease forwards;
-        }
-        .feature-card:hover { transform: translateY(-5px); border-color: rgba(0,217,255,0.35); box-shadow: 0 15px 40px rgba(0,217,255,0.1); }
-        @keyframes fadeIn { to { opacity: 1; } }
-        .feature-icon { font-size: 2.5rem; margin-bottom: 1rem; }
-        .feature-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.7rem; color: var(--cyan); }
-        .feature-card p { color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem; }
+        .char-card:hover { transform: translateY(-5px); }
+        .char-card img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+        .char-overlay { position: absolute; inset: 0; background: linear-gradient(to top,rgba(0,0,0,.85) 0%,transparent 55%); }
+        .char-info { position: absolute; bottom: 0; left: 0; right: 0; padding: .6rem .75rem; }
+        .char-name { font-weight: 800; font-size: .78rem; margin-bottom: .08rem; }
+        .char-role { font-size: .6rem; color: rgba(255,255,255,.55); }
 
-        footer {
-          text-align: center; padding: 2rem;
-          border-top: 1px solid var(--border);
-          color: var(--text-secondary); font-size: 0.9rem;
-          margin-top: auto;
+        /* ── STATS ── */
+        .stats-strip {
+          background: linear-gradient(135deg,rgba(79,195,247,.05),rgba(255,213,79,.03));
+          border-top: 1px solid rgba(79,195,247,.08);
+          border-bottom: 1px solid rgba(79,195,247,.08);
+          padding: 1.8rem 1.5rem;
+          display: flex; justify-content: center; gap: clamp(1.5rem,5vw,4rem); flex-wrap: wrap;
+        }
+        .stat-block { text-align: center; }
+        .stat-num { font-size: clamp(1.6rem,4vw,2.2rem); font-weight: 900; background: linear-gradient(135deg,#4fc3f7,#ffd54f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .stat-lbl { color: #455a64; font-size: .78rem; font-weight: 500; margin-top: .2rem; }
+
+        /* ── SECTION ── */
+        .kn-section { max-width: 1100px; margin: 0 auto; padding: 4rem 1.5rem; }
+        .section-tag {
+          display: inline-flex; align-items: center; gap: .4rem;
+          background: rgba(206,147,216,.07); border: 1px solid rgba(206,147,216,.22);
+          border-radius: 50px; padding: .28rem .85rem;
+          font-size: .68rem; color: #ce93d8; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+          margin-bottom: .8rem;
+        }
+        .section-title { font-size: clamp(1.6rem,4vw,2.2rem); font-weight: 900; margin-bottom: .55rem; letter-spacing: -.01em; }
+        .section-sub { color: #455a64; font-size: .9rem; margin-bottom: 2.5rem; line-height: 1.7; }
+
+        /* ── FEATURES ── */
+        .feat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: .9rem; }
+        .feat-card {
+          background: rgba(255,255,255,.025); border: 1px solid rgba(255,255,255,.06);
+          border-radius: 18px; padding: 1.3rem;
+          transition: all .25s; position: relative; overflow: hidden;
+        }
+        .feat-card::before { content: ''; position: absolute; inset: 0; border-radius: 18px; background: var(--feat-glow,transparent); opacity: 0; transition: opacity .3s; }
+        .feat-card:hover { border-color: var(--feat-border,rgba(255,255,255,.12)); transform: translateY(-3px); }
+        .feat-card:hover::before { opacity: 1; }
+        .feat-icon-wrap { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: .9rem; background: var(--feat-icon-bg,rgba(255,255,255,.07)); color: var(--feat-color,#fff); flex-shrink: 0; }
+        .feat-title { font-weight: 700; font-size: .9rem; margin-bottom: .35rem; }
+        .feat-desc { color: #455a64; font-size: .78rem; line-height: 1.6; }
+
+        /* ── CHARACTERS SECTION ── */
+        .chars-section {
+          background: linear-gradient(135deg,rgba(79,195,247,.03),rgba(239,83,80,.02));
+          border-top: 1px solid rgba(255,255,255,.04);
+          border-bottom: 1px solid rgba(255,255,255,.04);
+          padding: 4rem 1.5rem;
+        }
+        .chars-inner { max-width: 1100px; margin: 0 auto; }
+        .chars-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
+        .big-char-card {
+          position: relative; border-radius: 20px; overflow: hidden;
+          aspect-ratio: .65; cursor: pointer;
+          border: 1px solid rgba(255,255,255,.06);
+          transition: all .3s;
+        }
+        .big-char-card:hover { transform: translateY(-7px); border-color: var(--char-border,rgba(255,255,255,.18)); box-shadow: 0 18px 44px var(--char-glow,rgba(0,0,0,.4)); }
+        .big-char-card img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; filter: brightness(.82); transition: filter .3s; }
+        .big-char-card:hover img { filter: brightness(1); }
+        .big-char-overlay { position: absolute; inset: 0; background: linear-gradient(to top,rgba(0,0,0,.9) 0%,rgba(0,0,0,.1) 55%,transparent 100%); }
+        .big-char-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem; }
+        .big-char-name { font-weight: 800; font-size: clamp(.9rem,2vw,1.05rem); margin-bottom: .22rem; }
+        .big-char-role { font-size: .68rem; color: rgba(255,255,255,.5); line-height: 1.4; }
+        .char-badge { display: inline-block; padding: .14rem .5rem; border-radius: 6px; font-size: .6rem; font-weight: 700; margin-top: .38rem; background: var(--char-badge-bg,rgba(255,255,255,.1)); color: var(--char-badge-color,#fff); }
+
+        /* ── GALLERY ── */
+        .gallery-wrap { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+        .gallery-row { display: grid; grid-template-columns: repeat(4,1fr); gap: .8rem; }
+        .gallery-img { border-radius: 14px; overflow: hidden; aspect-ratio: 1.4; border: 1px solid rgba(255,255,255,.05); transition: all .3s; }
+        .gallery-img:hover { transform: scale(1.03); border-color: rgba(79,195,247,.28); }
+        .gallery-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        /* ── CTA ── */
+        .cta-section {
+          background: linear-gradient(135deg,rgba(79,195,247,.06),rgba(239,83,80,.04),rgba(255,213,79,.05));
+          border-top: 1px solid rgba(79,195,247,.12); padding: 5rem 1.5rem; text-align: center;
+        }
+        .cta-inner { max-width: 680px; margin: 0 auto; }
+        .cta-title { font-size: clamp(1.8rem,5vw,3rem); font-weight: 900; margin-bottom: .9rem; letter-spacing: -.02em; }
+        .cta-desc { color: #455a64; font-size: .95rem; line-height: 1.75; margin-bottom: 2.2rem; }
+        .cta-steps { display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2.2rem; }
+        .cta-step { display: flex; align-items: center; gap: .5rem; color: #607d8b; font-size: .85rem; }
+        .step-num { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg,#4fc3f7,#0288d1); display: flex; align-items: center; justify-content: center; font-size: .68rem; font-weight: 800; color: #000; }
+
+        /* ── FOOTER ── */
+        footer { padding: 2rem 1.5rem; text-align: center; border-top: 1px solid rgba(255,255,255,.05); color: #37474f; font-size: .78rem; }
+        footer span { color: #4fc3f7; }
+        .footer-chars { display: flex; justify-content: center; gap: .45rem; margin-bottom: .7rem; flex-wrap: wrap; }
+        .footer-char-img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,.1); }
+
+        /* ════ RESPONSIVE ════ */
+
+        /* Tablet ≤ 900px */
+        @media (max-width: 900px) {
+          .kn-nav-links, .kn-nav-btns { display: none; }
+          .hamburger { display: flex; }
+          .hero-chars { flex: 0 0 260px; }
+          .chars-grid { grid-template-columns: repeat(2,1fr); }
+          .gallery-row { grid-template-columns: repeat(2,1fr); }
+          .feat-grid { grid-template-columns: repeat(2,1fr); }
         }
 
-        @media (max-width: 768px) {
-          .hero-content { flex-direction: column; gap: 2rem; }
-          .hero-image { width: 100%; }
-          nav { display: none; }
+        /* Mobile ≤ 600px */
+        @media (max-width: 600px) {
+          .kn-nav { padding: .75rem 1rem; }
+          .hero { min-height: auto; }
+          .hero-inner { flex-direction: column; gap: 1.8rem; padding: 2rem 1rem; }
+          .hero-chars { flex: none; width: 100%; max-width: 340px; align-self: center; }
+          .hero-btns { flex-direction: column; }
+          .btn-hero-primary, .btn-hero-sec { justify-content: center; width: 100%; padding: .85rem 1.4rem; }
+          .anime-badge { font-size: .68rem; }
+          .stats-strip { gap: 1.2rem; padding: 1.4rem 1rem; }
+          .kn-section { padding: 3rem 1rem; }
+          .feat-grid { grid-template-columns: 1fr; }
+          .chars-section { padding: 3rem 1rem; }
+          .chars-grid { grid-template-columns: repeat(2,1fr); gap: .7rem; }
+          .big-char-info { padding: .7rem; }
+          .gallery-wrap { padding: 0 1rem 3rem; }
+          .gallery-row { grid-template-columns: repeat(2,1fr); gap: .55rem; }
+          .cta-section { padding: 3.5rem 1rem; }
+          .cta-steps { flex-direction: column; align-items: flex-start; padding-left: 1rem; }
+          footer { padding: 1.5rem 1rem; }
+        }
+
+        /* Very small ≤ 360px */
+        @media (max-width: 360px) {
+          .hero-title { font-size: 1.7rem; }
+          .chars-grid { grid-template-columns: 1fr 1fr; }
+          .gallery-row { grid-template-columns: 1fr; }
         }
       `}</style>
 
-      <header>
-        <div className="logo">
-          <span>🧿</span>
-          <span>Aqua Bot</span>
+      {/* NAV */}
+      <nav className="kn-nav">
+        <div className="kn-logo">
+          <img className="kn-logo-img" src="https://cdn.myanimelist.net/images/characters/14/282523.jpg" alt="Aqua" />
+          <div>
+            <div className="kn-logo-name">Konosuba</div>
+            <div className="kn-logo-sub">Community Bot</div>
+          </div>
         </div>
-        <nav>
-          <ul>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#community">Community</a></li>
-          </ul>
-        </nav>
-        <button className="btn-get-started" onClick={() => setLocation("/auth")}>Get Started</button>
-      </header>
+        <ul className="kn-nav-links">
+          <li><a>Features</a></li>
+          <li><a>Characters</a></li>
+          <li><a>Commands</a></li>
+          <li><a>Community</a></li>
+        </ul>
+        <div className="kn-nav-btns">
+          <button className="btn-ghost" onClick={() => setLocation("/auth")}>Sign In</button>
+          <button className="btn-main" onClick={() => setLocation("/auth")}>Get Started</button>
+        </div>
+        <button className="hamburger" onClick={() => setMenuOpen(o => !o)} aria-label="Menu">
+          {menuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+      </nav>
 
-      <section className="hero-wrapper">
-        <div className="hero-background" />
+      {/* Mobile menu */}
+      <div className={`mobile-menu${menuOpen ? " open" : ""}`}>
+        {["Features", "Characters", "Commands", "Community"].map(l => (
+          <a key={l} onClick={() => setMenuOpen(false)}>{l}</a>
+        ))}
+        <div className="mobile-menu-btns">
+          <button className="btn-ghost" onClick={() => { setMenuOpen(false); setLocation("/auth"); }}>Sign In</button>
+          <button className="btn-main" onClick={() => { setMenuOpen(false); setLocation("/auth"); }}>Get Started</button>
+        </div>
+      </div>
+
+      {/* HERO */}
+      <section className="hero">
+        <div className="hero-bg" />
+        <div className="hero-overlay" />
         <div className="hero-glow" />
-        <div className="hero-content">
+        <div className="hero-inner">
           <div className="hero-text">
-            <h1>Welcome to Aqua Bot</h1>
-            <p>The ultimate hub for community bots. Explore our immersive Economy, engage in epic RPG adventures, and conquer interactive games with your friends.</p>
-            <div className="hero-buttons">
-              <button className="btn-primary" onClick={() => setLocation("/auth")}>Join the Community</button>
-              <button className="btn-secondary" onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}>
-                Learn More
+            <div className="hero-eyebrow">⚔️ God's Blessing on This Wonderful World!</div>
+            <h1 className="hero-title">
+              <span className="g1">Konosuba</span><br />
+              <span className="g2">Community</span><br />
+              <span style={{ color: "#fff", fontSize: "75%" }}>WhatsApp Bot</span>
+            </h1>
+            <p className="hero-desc">
+              The ultimate anime-themed WhatsApp bot — economy, RPG, Pokémon, gambling and more.
+              Register once and your entire adventure syncs live to your web dashboard.
+            </p>
+            <div className="hero-btns">
+              <button className="btn-hero-primary" onClick={() => setLocation("/auth")}>
+                Join the Party <ChevronRight size={17} />
+              </button>
+              <button className="btn-hero-sec" onClick={() => setLocation("/auth")}>
+                <MessageCircle size={15} /> View Dashboard
               </button>
             </div>
-          </div>
-          <div className="hero-image">
-            <div className="hero-card">
-              <div className="hero-card-content">
-                <div className="hero-icon">🧿</div>
-                <h3>Multi-System Bot</h3>
-                <p>Economy, RPG, Games, Pokémon & more integrated into one powerful platform for WhatsApp</p>
-              </div>
+            <div className="anime-badge">
+              <img src="https://cdn.myanimelist.net/images/anime/1895/142748l.jpg" alt="KonoSuba" />
+              KonoSuba: God's Blessing · 3 Seasons · ⭐ 8.09 on MAL
             </div>
+          </div>
+
+          <div className="hero-chars">
+            {CHARS.map(c => (
+              <div key={c.name} className="char-card" style={{ boxShadow: `0 6px 24px ${c.glow}`, border: `1px solid ${c.color}28` }}>
+                <img src={c.img} alt={c.name} />
+                <div className="char-overlay" />
+                <div className="char-info">
+                  <div className="char-name" style={{ color: c.color }}>{c.name}</div>
+                  <div className="char-role">{c.role}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="section" id="features">
-        <h2 className="section-title">Amazing Features</h2>
-        <p className="section-subtitle">Everything your community needs to thrive</p>
-        <div className="features-grid">
-          {[
-            { icon: "💰", title: "Economy System", desc: "Full-featured economy with wallet, bank accounts, daily rewards, and interactive trading." },
-            { icon: "🎲", title: "Gambling Games", desc: "Coinflip, slots, blackjack, roulette, lottery with fair win rates and exciting mechanics." },
-            { icon: "🎮", title: "Mini Games", desc: "Hangman, trivia, riddles, word scramble, math quizzes, and fast typing challenges." },
-            { icon: "⚔️", title: "RPG Adventure", desc: "Choose your class, fight monsters, explore dungeons, defeat bosses, and level up." },
-            { icon: "🐾", title: "Pokémon Catch", desc: "Catch, train, evolve, and battle Pokémon with full progression and team battles." },
-            { icon: "🏰", title: "Guild System", desc: "Create and manage guilds with members, levels, treasury, and leaderboards." },
-          ].map((f, i) => (
-            <div className="feature-card" key={i} style={{ animationDelay: `${i * 0.1}s` }}>
-              <div className="feature-icon">{f.icon}</div>
-              <h3>{f.title}</h3>
-              <p>{f.desc}</p>
+      {/* STATS */}
+      <div className="stats-strip">
+        {[{ num: "50+", lbl: "Commands" }, { num: "4", lbl: "Characters" }, { num: "∞", lbl: "Adventures" }, { num: "24/7", lbl: "Online" }].map(s => (
+          <div className="stat-block" key={s.lbl}>
+            <div className="stat-num">{s.num}</div>
+            <div className="stat-lbl">{s.lbl}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* FEATURES */}
+      <section className="kn-section">
+        <div className="section-tag"><Sparkles size={10} /> Bot Features</div>
+        <h2 className="section-title">Everything in One Bot</h2>
+        <p className="section-sub">All your favourite activities — all synced live between WhatsApp and your web dashboard.</p>
+        <div className="feat-grid">
+          {FEATURES.map(f => (
+            <div key={f.title} className="feat-card" style={{
+              '--feat-color': f.color,
+              '--feat-icon-bg': `${f.color}18`,
+              '--feat-border': `${f.color}28`,
+              '--feat-glow': `radial-gradient(ellipse at top left, ${f.color}07, transparent 70%)`,
+            } as React.CSSProperties}>
+              <div className="feat-icon-wrap">{f.icon}</div>
+              <div className="feat-title">{f.title}</div>
+              <div className="feat-desc">{f.desc}</div>
             </div>
           ))}
         </div>
       </section>
 
+      {/* CHARACTERS */}
+      <section className="chars-section">
+        <div className="chars-inner">
+          <div style={{ textAlign: "center", marginBottom: "2.2rem" }}>
+            <div className="section-tag"><Trophy size={10} /> The Party</div>
+            <h2 className="section-title">Meet the Characters</h2>
+            <p className="section-sub" style={{ maxWidth: 480, margin: "0 auto" }}>The bot is themed around these legendary characters from KonoSuba.</p>
+          </div>
+          <div className="chars-grid">
+            {[
+              { name: "Aqua", role: "Goddess of Water\nUseless, crybaby, but weirdly endearing.", ...CHARS[0], badge: "Goddess", badgeBg: "rgba(79,195,247,.18)", badgeColor: "#4fc3f7" },
+              { name: "Megumin", role: "Arch-Wizard\nOne explosion per day. That's all she needs.", ...CHARS[1], badge: "Wizard", badgeBg: "rgba(239,83,80,.18)", badgeColor: "#ef5350" },
+              { name: "Darkness", role: "Crusader · Lalatina\nNoblewomen by day, battle-junkie by heart.", ...CHARS[2], badge: "Crusader", badgeBg: "rgba(255,213,79,.18)", badgeColor: "#ffd54f" },
+              { name: "Kazuma", role: "Adventurer\nReincarnated gamer with an OP luck stat.", ...CHARS[3], badge: "Adventurer", badgeBg: "rgba(165,214,167,.18)", badgeColor: "#a5d6a7" },
+            ].map(c => (
+              <div key={c.name} className="big-char-card" style={{
+                '--char-border': `${c.color}45`,
+                '--char-glow': c.glow,
+                '--char-badge-bg': c.badgeBg,
+                '--char-badge-color': c.badgeColor,
+              } as React.CSSProperties}>
+                <img src={c.img} alt={c.name} />
+                <div className="big-char-overlay" />
+                <div className="big-char-info">
+                  <div className="big-char-name" style={{ color: c.color }}>{c.name}</div>
+                  <div className="big-char-role" style={{ whiteSpace: "pre-line" }}>{c.role}</div>
+                  <span className="char-badge">{c.badge}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* GALLERY */}
+      <div className="gallery-wrap">
+        <div className="gallery-row">
+          {BANNERS.map((src, i) => (
+            <div key={i} className="gallery-img"><img src={src} alt={`KonoSuba art ${i + 1}`} /></div>
+          ))}
+        </div>
+      </div>
+
+      {/* CTA */}
+      <section className="cta-section">
+        <div className="cta-inner">
+          <div style={{ fontSize: "2.5rem", marginBottom: ".9rem" }}>⚔️</div>
+          <h2 className="cta-title">
+            <span style={{ background: "linear-gradient(135deg,#4fc3f7,#ffd54f)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              Join the Adventure
+            </span>
+          </h2>
+          <p className="cta-desc">Your WhatsApp number is your key. Type <strong style={{ color: "#4fc3f7" }}>.reg</strong> in the bot, sign up here with your number, and watch your stats sync live.</p>
+          <div className="cta-steps">
+            {["Message the bot on WhatsApp", "Type .reg to get the link", "Sign up with your number", "Stats appear instantly"].map((s, i) => (
+              <div key={i} className="cta-step"><div className="step-num">{i + 1}</div>{s}</div>
+            ))}
+          </div>
+          <button className="btn-hero-primary" onClick={() => setLocation("/auth")}>
+            Create Account <ChevronRight size={17} />
+          </button>
+        </div>
+      </section>
+
+      {/* FOOTER */}
       <footer>
-        <p>&copy; 2026 Aqua Bot. Made with 💜 for the KONOSUBA community.</p>
+        <div className="footer-chars">
+          {CHARS.map(c => <img key={c.name} className="footer-char-img" src={c.img} alt={c.name} title={c.name} />)}
+        </div>
+        <p>© 2025 <span>Konosuba Community Bot</span> · Based on <span>KonoSuba: God's Blessing on This Wonderful World!</span></p>
       </footer>
     </div>
   );
