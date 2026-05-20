@@ -4,20 +4,28 @@ export function getToken(): string | null {
   return localStorage.getItem('kono_token');
 }
 
-export function getCurrentUser(): { phone: string; username: string } | null {
+export function getCurrentUser(): { phone: string; username: string; jid?: string } | null {
   const raw = localStorage.getItem('kono_user');
   if (!raw) return null;
   try { return JSON.parse(raw); } catch { return null; }
 }
 
+export function getJid(phone: string): string {
+  const clean = phone.replace(/\D/g, '').replace(/^0+/, '');
+  return `${clean}@s.whatsapp.net`;
+}
+
 export function setSession(token: string, user: { phone: string; username: string }) {
+  const jid = getJid(user.phone);
   localStorage.setItem('kono_token', token);
-  localStorage.setItem('kono_user', JSON.stringify(user));
+  localStorage.setItem('kono_user', JSON.stringify({ ...user, jid }));
+  localStorage.setItem('kono_jid', jid);
 }
 
 export function clearSession() {
   localStorage.removeItem('kono_token');
   localStorage.removeItem('kono_user');
+  localStorage.removeItem('kono_jid');
 }
 
 export function formatMoney(n: number) {
@@ -47,33 +55,47 @@ async function apiFetch(path: string, options?: RequestInit) {
 }
 
 export async function apiSignup(phone: string, username: string, password: string, country: string) {
+  const jid = getJid(phone);
   return apiFetch('/api/auth/signup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phone, username, password, country }),
+    body: JSON.stringify({ phone, username, password, country, jid }),
   });
 }
 
 export async function apiLogin(phone: string, password: string) {
+  const jid = getJid(phone);
   return apiFetch('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phone, password }),
+    body: JSON.stringify({ phone, password, jid }),
   });
 }
 
 export async function apiGetUser(phone: string) {
   const token = getToken();
-  return apiFetch(`/api/user/${phone}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const jid = getJid(phone);
+  try {
+    return await apiFetch(`/api/user/${phone}`, {
+      headers: { Authorization: `Bearer ${token}`, 'X-WA-JID': jid },
+    });
+  } catch {
+    try {
+      return await apiFetch(`/api/user/jid/${encodeURIComponent(jid)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch {
+      return null;
+    }
+  }
 }
 
 export async function apiGetActivities(phone: string) {
   const token = getToken();
+  const jid = getJid(phone);
   try {
     return await apiFetch(`/api/user/${phone}/activity`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}`, 'X-WA-JID': jid },
     });
   } catch {
     return { activities: [] };
@@ -88,5 +110,19 @@ export async function apiGetLeaderboard() {
     });
   } catch {
     return { users: [] };
+  }
+}
+
+export async function apiSyncWhatsApp(phone: string) {
+  const token = getToken();
+  const jid = getJid(phone);
+  try {
+    return await apiFetch('/api/auth/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ phone, jid }),
+    });
+  } catch {
+    return null;
   }
 }
