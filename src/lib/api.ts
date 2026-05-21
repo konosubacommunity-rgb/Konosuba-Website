@@ -1,3 +1,6 @@
+// The bot API URL is set via VITE_BOT_API_URL on Vercel.
+// On Vercel: Project → Settings → Environment Variables → VITE_BOT_API_URL
+// Value: your Render service URL e.g. https://konosuba-bot.onrender.com
 export const API_BASE = (import.meta.env.VITE_BOT_API_URL as string) || 'https://konosuba-bot.onrender.com';
 
 export function getToken(): string | null {
@@ -62,6 +65,7 @@ export async function apiLogin(phone: string, password: string) {
   });
 }
 
+// Returns the full user profile including rpg, inventory, pokemon, pet, guild
 export async function apiGetUser(phone: string) {
   const token = getToken();
   return apiFetch(`/api/user/${phone}`, {
@@ -69,6 +73,7 @@ export async function apiGetUser(phone: string) {
   });
 }
 
+// Returns activities newest-first — DO NOT reverse on the client
 export async function apiGetActivities(phone: string) {
   const token = getToken();
   try {
@@ -81,11 +86,8 @@ export async function apiGetActivities(phone: string) {
 }
 
 export async function apiGetLeaderboard() {
-  const token = getToken();
   try {
-    return await apiFetch('/api/leaderboard', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    return await apiFetch('/api/leaderboard');
   } catch {
     return { users: [] };
   }
